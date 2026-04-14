@@ -17,3 +17,4 @@ class Candidate(Base):
     current_role = Column(String, nullable=True)
     embedding = Column(Vector(384), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+

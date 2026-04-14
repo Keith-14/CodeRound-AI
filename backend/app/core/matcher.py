@@ -313,3 +313,4 @@ class HybridMatcher:
         results = [self.match_candidate_to_jd(jd, cand) for cand in candidates]
         results.sort(key=lambda x: x.total_score, reverse=True)
         return results
+

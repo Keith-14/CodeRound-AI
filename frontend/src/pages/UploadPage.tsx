@@ -1,9 +1,10 @@
 import React, { useState, useRef } from "react"
-import { uploadBulkFile, api } from "../lib/api"
+import { api } from "../lib/api"
+import { parseCandidatesCSV, parseJobsTXT } from "../utils/seedParser"
 import { UploadCloud, FileType, Database, X } from "lucide-react"
 import toast from "react-hot-toast"
 
-function DragDropZone({ title, type, endpoint }: { title: string, type: 'jobs' | 'candidates', endpoint: string }) {
+function DragDropZone({ title, type }: { title: string, type: 'jobs' | 'candidates' }) {
   const [file, setFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -17,16 +18,95 @@ function DragDropZone({ title, type, endpoint }: { title: string, type: 'jobs' |
     }
   };
 
+  const [progressMsg, setProgressMsg] = useState("");
+
   const handleSubmit = async () => {
     if (!file) return;
     setIsUploading(true);
+    setProgressMsg("Parsing file...");
     try {
-      const res = await uploadBulkFile(endpoint, file);
-      toast.success(`${res.length} ${type} uploaded successfully!`);
+      if (type === 'candidates') {
+        const candidates = await parseCandidatesCSV(file);
+        if (!candidates.length) throw new Error("No candidates parsed.");
+        let successCount = 0;
+        let diffErrorCount = 0;
+        
+        for (let i = 0; i < candidates.length; i++) {
+          setProgressMsg(`Uploading candidate ${i + 1} of ${candidates.length}...`);
+          try {
+            await api.post("/candidates", candidates[i]);
+            successCount++;
+          } catch (e: any) {
+            const status = e.response?.status;
+            const detail = e.response?.data?.detail;
+            const detailStr = (typeof detail === 'string' ? detail : JSON.stringify(detail)).toLowerCase();
+            const isDuplicate = status === 409 || detailStr.includes('already') || detailStr.includes('exists');
+            if (!isDuplicate) {
+               diffErrorCount++;
+               if (diffErrorCount === 1) {
+                  toast.error(`First upload error: ${detailStr.substring(0, 100)}`, { duration: 8000 });
+               }
+            }
+          }
+        }
+        
+        const summary = diffErrorCount > 0 
+           ? `Processed ${successCount} candidates (${diffErrorCount} failures, ignoring duplicates)`
+           : `Successfully processed ${successCount} candidates! (ignoring duplicates)`;
+        toast.success(summary, { duration: 5000 });
+      } else if (type === 'jobs') {
+        const jobs = await parseJobsTXT(file);
+        if (!jobs.length) throw new Error("No job descriptions parsed.");
+        const jobIds: string[] = [];
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (let i = 0; i < jobs.length; i++) {
+          setProgressMsg(`Uploading job ${i + 1} of ${jobs.length}...`);
+          try {
+            const res = await api.post("/jobs", jobs[i]);
+            if (res.data?.id) {
+               jobIds.push(res.data.id);
+               successCount++;
+            }
+          } catch (e: any) {
+             errorCount++;
+          }
+        }
+        
+        if (jobIds.length > 0) {
+          for (let i = 0; i < jobIds.length; i++) {
+            try {
+              const jd_id = jobIds[i];
+              setProgressMsg(`Matching JD ${i + 1} of ${jobIds.length}...`);
+              const triggerRes = await api.post(`/match/trigger/${jd_id}`);
+              const taskId = triggerRes.data.job_id;
+              
+              for (let attempts = 0; attempts < 40; attempts++){
+                 const statusRes = await api.get(`/match/status/${taskId}`);
+                 const status = statusRes.data?.status?.toLowerCase();
+                 if (status === 'complete' || status === 'success') {
+                   break;
+                 } else if (status === 'failed' || status === 'failure' || status === 'error') {
+                   toast.error(`Matching failed for one of the JDs.`);
+                   break;
+                 }
+                 await new Promise(r => setTimeout(r, 2000));
+              }
+            } catch (e) {
+               console.error("Matching trigger error", e);
+            }
+          }
+          toast.success(`Matching complete for ${successCount} job descriptions!`);
+        } else {
+          toast.error(`Uploaded 0 jobs. Errors: ${errorCount}`);
+        }
+      }
       setFile(null);
+      setProgressMsg("");
     } catch (err: any) {
-      const msg = err.response?.data?.detail || "Upload failed. Please check CSV format.";
-      toast.error(msg);
+      toast.error(err.message || "Upload failed.");
+      setProgressMsg("");
     } finally {
       setIsUploading(false);
     }
@@ -54,7 +134,9 @@ function DragDropZone({ title, type, endpoint }: { title: string, type: 'jobs' |
           >
             <UploadCloud className={`w-10 h-10 mb-3 ${isDragOver ? "text-indigo-500" : "text-slate-400"}`} />
             <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Click or drag file to this area to upload</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Supports CSV and JSON bulk files</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Supports {type === 'jobs' ? 'TXT, JSON' : 'CSV, JSON'} files
+            </p>
             <input 
               type="file" 
               className="hidden" 
@@ -62,7 +144,7 @@ function DragDropZone({ title, type, endpoint }: { title: string, type: 'jobs' |
               onChange={(e) => {
                 if (e.target.files?.length) setFile(e.target.files[0])
               }}
-              accept=".csv,.json"
+              accept={type === 'jobs' ? '.txt,.json' : '.csv,.json'}
             />
           </div>
         ) : (
@@ -83,10 +165,13 @@ function DragDropZone({ title, type, endpoint }: { title: string, type: 'jobs' |
             <button
               onClick={handleSubmit}
               disabled={isUploading}
-              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900 disabled:opacity-70 flex items-center justify-center"
+              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900 disabled:opacity-70 flex items-center justify-center flex-col"
             >
               {isUploading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mb-1" />
+                  <span className="text-xs">{progressMsg}</span>
+                </>
               ) : (
                 "Upload File"
               )}
@@ -307,8 +392,8 @@ export function UploadPage() {
 
       {activeTab === 'bulk' ? (
         <div className="grid md:grid-cols-2 gap-8">
-          <DragDropZone title="Upload Job Descriptions" type="jobs" endpoint="/jobs/bulk" />
-          <DragDropZone title="Upload Candidates" type="candidates" endpoint="/candidates/bulk" />
+          <DragDropZone title="Upload Job Descriptions" type="jobs" />
+          <DragDropZone title="Upload Candidates" type="candidates" />
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-8">
@@ -325,3 +410,4 @@ export function UploadPage() {
     </div>
   )
 }
+

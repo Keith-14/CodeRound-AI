@@ -14,3 +14,4 @@ numpy
 python-dotenv
 alembic
 pydantic-settings
+google-genai

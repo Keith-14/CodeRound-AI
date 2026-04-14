@@ -14,3 +14,4 @@ shell:
 
 migrate:
 	docker exec -it $$(docker-compose ps -q backend) alembic upgrade head
+

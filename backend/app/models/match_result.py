@@ -28,3 +28,4 @@ class MatchResult(Base):
 
     job_description = relationship("JobDescription")
     candidate = relationship("Candidate")
+

@@ -25,3 +25,4 @@ export function Progress({ className, value = 0, indicatorClassName, ...props }:
     </div>
   )
 }
+

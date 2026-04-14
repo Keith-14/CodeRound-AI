@@ -17,7 +17,7 @@ def create_candidate(candidate_in: CandidateCreate, db: Session = Depends(get_db
         # Check email duplicate
         existing = db.query(Candidate).filter(Candidate.email == candidate_in.email).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=409, detail="Email already registered")
             
         cand_obj = Candidate(**candidate_in.model_dump())
         db.add(cand_obj)
@@ -133,3 +133,4 @@ def get_candidate(candidate_id: UUID, db: Session = Depends(get_db)):
         import logging
         logging.error(f"Error fetching candidate: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+

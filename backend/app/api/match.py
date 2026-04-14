@@ -90,3 +90,4 @@ def get_match_explanation(jd_id: UUID, candidate_id: UUID, db: Session = Depends
         import logging
         logging.error(f"Error fetching explanation: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+

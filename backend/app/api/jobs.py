@@ -130,3 +130,4 @@ def get_job(jd_id: UUID, db: Session = Depends(get_db)):
         import logging
         logging.error(f"Error fetching job: {e}")
         raise HTTPException(status_code=500, detail="Internal server error while fetching job")
+

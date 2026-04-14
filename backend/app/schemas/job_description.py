@@ -15,6 +15,8 @@ class JobDescriptionCreate(BaseModel):
 
 class JobDescriptionOut(JobDescriptionCreate):
     id: UUID
+    ai_summary: Optional[str] = None
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+

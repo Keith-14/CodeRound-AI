@@ -19,3 +19,4 @@ export const uploadBulkFile = async (endpoint: string, file: File) => {
   });
   return response.data;
 };
+

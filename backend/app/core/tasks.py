@@ -10,6 +10,7 @@ from app.core.matcher import HybridMatcher
 from app.models.job_description import JobDescription
 from app.models.candidate import Candidate
 from app.models.match_result import MatchResult
+from app.core import ai_parser
 import logging
 import time
 
@@ -65,6 +66,25 @@ def embed_and_store_jd(self, jd_id: str):
         
         m = get_matcher()
         desc = jd.description or ""
+        
+        # --- AI Parsing Extension ---
+        try:
+            logger.info(f"Task {self.request.id}: Attempting AI parsing for JD {jd_id}")
+            ai_data = ai_parser.extract_skills_and_summary(desc)
+            if ai_data:
+                # Overwrite heuristics with AI validated skills
+                if ai_data.get("extracted_skills"):
+                    # SQLAlchemy requires reassigning the list to trigger array update natively
+                    jd.required_skills = ai_data["extracted_skills"]
+                if ai_data.get("summary"):
+                    jd.ai_summary = ai_data["summary"]
+                logger.info(f"Task {self.request.id}: AI Parsing successful for JD {jd_id}")
+            else:
+                logger.warning(f"Task {self.request.id}: AI Parsing returned None. Proceeding with fallback values.")
+        except Exception as e:
+            logger.error(f"Task {self.request.id}: AI Parsing encountered non-blocking error: {e}. Proceeding with fallback values.")
+        # --- End AI Parsing Extension ---
+        
         embedding = m.embed_text(desc).tolist()
         jd.embedding = embedding
         
@@ -156,3 +176,4 @@ def run_bulk_matching(self, jd_ids: list[str]):
     job = group(run_matching_for_jd.s(jd_id) for jd_id in jd_ids)
     result = job.apply_async()
     return result.id
+

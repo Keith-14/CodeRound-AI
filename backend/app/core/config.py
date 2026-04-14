@@ -39,3 +39,4 @@ if resolved_dim != 384:
 else:
     logger.warning("Embedding model locked to all-MiniLM-L6-v2 (384 dims). Changing MODEL_NAME requires a schema migration.")
 
+

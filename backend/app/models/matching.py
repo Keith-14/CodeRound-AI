@@ -17,3 +17,4 @@ class Job(Base):
     title = Column(String, index=True)
     description = Column(Text)
     embedding = Column(Vector(384))
+
