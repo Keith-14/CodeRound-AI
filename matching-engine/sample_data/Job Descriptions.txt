@@ -1,0 +1,82 @@
+﻿AI Engineer
+Overview
+We are seeking an AI Engineer with experience in building and deploying production-grade AI systems. The role involves designing and developing personalization engines, conversational AI systems, and orchestration layers that support large-scale, real-world user interactions. This position requires strong system design capabilities in addition to experience with machine learning models.
+Core Requirements
+* Strong proficiency in Python and system design
+* Minimum 2 years of experience building backend systems or AI-powered applications
+* Experience deploying LLM-based applications in production
+* Hands-on experience with Retrieval-Augmented Generation (RAG), embeddings, and vector databases
+* Experience working with asynchronous APIs and FastAPI
+* Understanding of prompt versioning and LLM evaluation methodologies
+* Experience designing and implementing memory systems
+Preferred Qualifications
+* Experience with AI orchestration frameworks
+* Familiarity with cost optimization strategies for AI systems
+* Experience working in high-growth startup environments
+Responsibilities
+LLM System Design and Deployment
+* Design and deploy production-grade LLM applications, including chat systems, coaching flows, and content engines
+* Develop context management and memory architectures
+* Implement RAG pipelines, including chunking strategies, embeddings, and retrieval optimization
+* Design guardrails and systems to mitigate hallucinations
+* Optimize systems for latency, cost, and output quality
+Personalization and Recommendation Systems
+* Build personalization engines using behavioral and engagement data
+* Design hybrid machine learning and rule-based systems to ensure explainability and control
+* Develop experimentation frameworks, including A/B testing and feature flagging
+AI Orchestration and Backend Systems
+* Develop scalable AI microservices using FastAPI
+* Design asynchronous pipelines, queues, and caching layers
+* Integrate external AI services such as LLMs, image generation, text-to-speech, and speech-to-text
+* Work with databases including PostgreSQL, MongoDB, and vector databases
+Evaluation and Reliability
+* Build automated evaluation pipelines, including LLM evaluation and regression testing
+* Design monitoring and observability systems for AI behavior in production
+* Diagnose and resolve issues related to prompt drift, quality degradation, and cost inefficiencies
+Skills Required
+AI Engineer, Machine Learning Engineer, Python, LLMs, Generative AI, MLOps, NLP, RAG, Vector Databases, Prompt Engineering, PyTorch, TensorFlow, Scikit-learn, Docker, Kubernetes, MLflow, Weights & Biases, API Development
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Backend Engineer
+Overview
+We are seeking a Backend Engineer to design and build the core infrastructure of our SaaS platform. The role involves developing scalable microservices, building APIs, and managing IoT data pipelines in a high-ownership environment.
+Core Requirements
+* Minimum 3 years of experience in backend development
+* Strong proficiency in Node.js
+* Experience with backend frameworks such as FastAPI, Django, or Express
+* Strong understanding of RESTful APIs and microservices architecture
+* Experience with relational and/or NoSQL databases
+Preferred Qualifications
+* Experience with cloud platforms such as AWS, GCP, or Azure
+* Familiarity with Docker, Kubernetes, and CI/CD pipelines
+* Experience with caching systems such as Redis
+* Experience with messaging systems such as Kafka or RabbitMQ
+* Understanding of distributed systems and scalability concepts
+* Experience working in startup environments or building products from 0 to 1
+Responsibilities
+* Design and develop scalable backend systems and microservices using Node.js
+* Build secure and reliable RESTful APIs for frontend integration
+* Implement serverless solutions using AWS services such as Lambda, API Gateway, and DynamoDB
+* Manage ingestion and processing of IoT data streams
+* Ensure code quality through testing, code reviews, and adherence to best practices
+* Collaborate with frontend and DevOps teams to ensure seamless integration and deployment
+Skills Required
+Backend Engineer, Node.js, AWS, Microservices, IoT, SaaS, Serverless, API Development, Cloud Infrastructure, Distributed Systems, Startup Experience
